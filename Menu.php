@@ -1,3 +1,11 @@
+<?php
+session_start();
+ob_start();
+include "admin/config/koneksi.php";
+include 'settingRole.php'
+
+?>
+
 <!DOCTYPE html>
 <html lang="en">
   <head>
@@ -9,6 +17,7 @@
       name="viewport"
     />
     <?php include 'admin/inc/cdnAtas.php' ?>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css"> 
   </head>
   <body>
     <div class="wrapper">
@@ -29,12 +38,22 @@
        <!-- start isi content -->
         <div class="container">
           <div class="page-inner">
-            <h5>Selamat Datang </h5>
-            <div
-              class="d-flex align-items-left align-items-md-center flex-column flex-md-row pt-2 pb-4"
-            >
+            <div class=" align-items-left align-items-md-center flex-column flex-md-row pt-2 pb-4">
         <!-- isi disini contentnya -->
-              
+              <section class="section">
+            <?php
+            if (isset($_GET['page'])) {
+                //jika file ada
+                if (file_exists("content/" . $_GET['page'] . ".php")) {
+                    include("content/" . $_GET['page'] . ".php");
+                } else {
+                    include "content/notfound.php";
+                }
+            } else {
+                include 'content/dashboard.php';
+            }
+            ?>
+
       <!-- batas sampe sini -->
             </div>
           </div>
