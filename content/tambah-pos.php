@@ -110,16 +110,16 @@ if (isset($_POST['save'])) {
                 if (isset($_GET['add-user-role'])):
                     $title = "Add User Role : ";
                 elseif (isset($_GET["edit"])):
-                    $title = "Edit User";
+                    $title = "Edit Produk";
                 else:
-                    $title = "Tambah User";
+                    $title = "Tambah Produk";
                 endif;
                 ?>
                 <h5 class="card-title"><?php echo $title ?></h5>
                 <!-- //untuk menghilangkan form add user dan tambah form baru 16/06/2025 -->
                 <?php if (isset($_GET['add-user-role'])): ?>
                     <div align="right" class="">
-                        <button class="btn btn-primary mb-3" data-bs-toggle="modal" data-bs-target="#exampleModal">Add Role</button>
+                        <button class="btn btn-primary mb-3" data-bs-toggle="modal" data-bs-target="#exampleModal">Add Produk</button>
                     </div>
                     <table class="table table-bordered">
                         <thead>
@@ -155,7 +155,7 @@ if (isset($_POST['save'])) {
                                         name="no_transaction">
                                 </div>
                                 <div class="mb-3">
-                                    <label for="">Product </label>
+                                    <label for="">Menu </label>
                                     <select name="id_product" id="id_product" class="form-control">
                                         <option value="">Select One</option>
                                         <?php foreach ($rowProducts as $rowProduct): ?>
@@ -168,7 +168,7 @@ if (isset($_POST['save'])) {
                             </div>
                             <div class="col-sm-4">
                                 <div class="mb-3">
-                                    <label for="">Cashier *</label>
+                                    <label for="">Kasir</label>
                                     <input value="<?php echo $_SESSION['NAME'] ?>"
                                         type="text" class="form-control"
                                         readonly>
@@ -178,14 +178,14 @@ if (isset($_POST['save'])) {
                         </div>
 
                         <div align="right" class="mb-3">
-                            <button type="button" class="btn btn-primary addRow" id="addRow">Add Row</button>
+                            <button type="button" class="btn btn-primary addRow" id="addRow">Tambah</button>
                         </div>
                         <table class="table" id="myTable">
                             <thead>
                                 <tr>
                                     <th>No</th>
-                                    <th>Product Name</th>
-                                    <th>Qty</th>
+                                    <th>Nama</th>
+                                    <th>Order</th>
                                     <th>Total</th>
                                     <th></th>
                                 </tr>
@@ -195,7 +195,7 @@ if (isset($_POST['save'])) {
                         </table>
                         <br>
 
-                        <p> <strong>Grand Total : Rp. <span id="grandTotal"></span></strong> </p>
+                        <p> <strong>Total : Rp. <span id="grandTotal"></span></strong> </p>
                         <input type="hidden" name="grand_total" id="grandTotalInput" value="0">
                         <div class="mb-3">
                             <input type="submit" class="btn btn-success" name="save" value="Save">

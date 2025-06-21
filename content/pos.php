@@ -19,19 +19,19 @@ if (isset($_GET['delete'])) {
     <div class="col-12">
         <div class="card">
             <div class="card-body">
-                <h5 class="card-title">Data Transaction</h5>
+                <h5 class="card-title">Data Transaksi</h5>
                 <div align="right" class="mb-3">
-                    <a href="?page=tambah-pos" class="btn btn-primary">Add Transaction</a>
+                    <a href="?page=tambah-pos" class="btn btn-primary">Tambah Transaksi</a>
                 </div>
                 <div class="table-responsive">
                     <table class="table table-bordered">
                         <thead>
                             <tr>
                                 <th>No</th>
-                                <th>No Transaction</th>
-                                <th>Cashier Name</th>
+                                <th>No Transaksi</th>
+                                <th>Nama Kasir</th>
                                 <th>Sub Total (Rp)</th>
-                                <th></th>
+                                <th>Action</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -44,11 +44,11 @@ if (isset($_GET['delete'])) {
                                     <td><?php echo "Rp." .  $row['sub_total'] ?></td>
                                     <td>
 
-                                        <a href="?page=print-pos&print=<?php echo $row['id'] ?>"
+                                        <a href="?page=print&print=<?php echo $row['id'] ?>"
                                             class="btn btn-primary" target="_blank">Print</a>
                                         <a onclick="return confirm('Are you sure wanna delete this data??')"
                                             href="?page=pos&delete=<?php echo $row['id'] ?>"
-                                            class="btn btn-danger">Delete</a>
+                                            class="btn btn-danger">Hapus</a>
 
                                     </td>
                                 </tr>

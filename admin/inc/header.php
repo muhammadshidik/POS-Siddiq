@@ -1,12 +1,12 @@
- 
- 
+<?php
+   $idNav = $_SESSION['id'];
+  $queryNav = mysqli_query($connection, "SELECT user.*, level.level_name FROM user LEFT JOIN level ON user.id_level = level.id WHERE user.id = '$idNav'");
+  $rowNav  = mysqli_fetch_array($queryNav);
+  ?>
  <div class="main-panel">
         <div class="main-header">
             <?php
-
     $name = isset($_SESSION['NAME']) ? $_SESSION['NAME'] : '';
-
-
     ?>
           <!-- Navbar Header -->
           <nav
@@ -318,9 +318,17 @@
                         class="avatar-img rounded-circle"
                       />
                     </div>
+
+                      <div class="avatar avatar-online">
+                       <img src="<?= !empty($rowNav['profile_picture']) && file_exists('../img/profile_picture/' . $rowNav['profile_picture']) ? 'img/profile_picture/' . $rowNav['profile_picture'] : 'https://placehold.co/100' ?>" alt class="w-px-40 h-auto rounded-circle" />
+                     </div>
+                     <div>
+                       <small class="text-muted"><?= isset($rowNav['level_name']) ? $rowNav['level_name'] : 'unleveled' ?></small>
+                     </div>
+                     
                     <span class="profile-username">
                       <span class="op-7">Hi,</span>
-                      <span class="fw-bold">Hizrian</span>
+                      <span class="fw-bold"><?= isset($rowNav['name']) ? $rowNav['name'] : '-- your name --' ?></span>
                     </span>
                   </a>
                   <ul class="dropdown-menu dropdown-user animated fadeIn">
@@ -335,7 +343,7 @@
                             />
                           </div>
                           <div class="u-text">
-                            <h4>Hizrian</h4>
+                            <h4><?= isset($rowNav['username']) ? $rowNav['username'] : '-- your name --' ?></h4>
                             <p class="text-muted">hello@example.com</p>
                             <a
                               href="profile.html"

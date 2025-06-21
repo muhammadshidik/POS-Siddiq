@@ -3,7 +3,7 @@
 // ambil data dari inputan, email, nama dan password
 // masukkan ke dalam table user (name, email, password) nilainya dari masing-masing inputan 
 //fungsi insert
-include "config/koneksi.php";
+include "admin/config/koneksi.php";
 if (isset($_GET['delete'])) {
     $id = isset($_GET['delete']) ? $_GET['delete'] : '';
     $queryDelete = mysqli_query($config, "DELETE FROM products WHERE id='$id'");
@@ -54,7 +54,7 @@ $rowCategoryProduct = mysqli_fetch_all($queryCategoryProduct, MYSQLI_ASSOC);
                         <select name="id_category" id="" class="form-control">
                             <option value="">Select One</option>
                             <?php foreach ($rowCategoryProduct as $rowCategory): ?>
-                                <option <?php echo isset($rowEdit) ? ($rowCategory['id'] == $rowEdit['id_category']) ? 'selected' : '' : '' ?> value=""><?php echo $rowCategory['id']?><?php echo $rowCategory['name']?></option>
+                                <option <?php echo isset($rowEdit) ? ($rowCategory['id'] == $rowEdit['id_category']) ? 'selected' : '' : '' ?> value=""><?php echo $rowCategory['name']?></option>
                                 <?php endforeach?>;
                             </select>
                           </div>
