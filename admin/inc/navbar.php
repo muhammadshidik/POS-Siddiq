@@ -367,7 +367,7 @@ if ($idNav != 0) {
                         <div class="dropdown-divider"></div>
                         <a class="dropdown-item" href="#">Account Setting</a>
                         <div class="dropdown-divider"></div>
-                        <a class="dropdown-item" href="login.php">Logout</a>
+                        <a class="dropdown-item" href="index.php">Logout</a>
                       </li>
                     </div>
                   </ul>
