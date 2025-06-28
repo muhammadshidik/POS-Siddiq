@@ -1,7 +1,7 @@
 <?php
 
 if (isset($_GET['delete'])) {
-    $id_user = isset($_GET['delete']) ? $_GET['delete'] : '';
+    $id_user = $_GET['delete'];
     $queryDelete = mysqli_query($config, "DELETE FROM transactions WHERE id='$id_user'");
 
     if ($queryDelete) {
@@ -12,35 +12,27 @@ if (isset($_GET['delete'])) {
 }
 
 if (isset($_GET["edit"])) {
-    $id_user = isset($_GET["edit"]);
+    $id_user = $_GET["edit"];
 } elseif (isset($_GET["add-user-role"])) {
-    $id_user = isset($_GET["add-user-role"]);
+    $id_user = $_GET["add-user-role"];
 }
 
-// $id_user = isset($_GET['edit']) ? $_GET['edit'] : '';
 $queryEdit = mysqli_query($config, "SELECT * FROM users WHERE id='$id_user'");
 $rowEdit = mysqli_fetch_assoc($queryEdit);
-// print_r($id_user);
+
 if (isset($_POST['name'])) {
-    //ada tidak parameter bernama edit, kalo ada jalankan perintah edit/update, kalo tidak ada tambah data baru/insert
     $name = $_POST['name'];
     $email = $_POST['email'];
     $password = isset($_POST['password']) ? sha1($_POST['password']) : $rowEdit['password'];
-
-
 
     if (!isset($_GET['edit'])) {
         $insert = mysqli_query($config, "INSERT INTO users (name, email, password) VALUES('$name','$email','$password')");
         header("location:?page=user&tambah=berhasil");
     } else {
-        $Update = mysqli_query($config, "UPDATE users SET name='$name', email='$email', password='$password' WHERE id='$id_user'");
+        $update = mysqli_query($config, "UPDATE users SET name='$name', email='$email', password='$password' WHERE id='$id_user'");
         header("location:?page=user&ubah=berhasil");
     }
 }
-
-// $id_user = isset($_GET["add-user-role"]) ? $_GET["add-user-role"] : '';
-
-
 
 $queryUserRoles = mysqli_query($config, "SELECT user_roles.*, roles.name FROM user_roles
 LEFT JOIN roles ON user_roles.id_role = roles.id
@@ -51,26 +43,20 @@ $rowUserRoles = mysqli_fetch_all($queryUserRoles, MYSQLI_ASSOC);
 if (isset($_POST['id_role'])) {
     $id_role = $_POST['id_role'];
     $insert = mysqli_query($config, "INSERT INTO user_role (id_role, id_user) VALUES('$id_role','$id_user')");
-    header("location:?page=Tambah-user&add-user-role=" . $id_user . "add-role=berhasil");
+    header("location:?page=Tambah-user&add-user-role=" . $id_user . "&add-role=berhasil");
 }
+
 $queryProduct = mysqli_query($config, "SELECT * FROM products ORDER BY id DESC");
 $rowProducts = mysqli_fetch_all($queryProduct, MYSQLI_ASSOC);
 
 $queryNoteTrans = mysqli_query($config, "SELECT MAX(id) as id_trans FROM transactions");
 $rowNoteTrans = mysqli_fetch_assoc($queryNoteTrans);
-$id_trans = $rowNoteTrans['id_trans'];
+$id_trans = $rowNoteTrans['id_trans'] ?? 0;
 $id_trans++;
-
-// opsional lain buat nomor transaksi:
-// if(mysqli_num_rows($queryNoteTrans) > 0){
-//     $id_trans = $rowNoteTrans['id_trans'] + 1;
-// }else {
-//     $id_trans = 1;
-// }
 
 $format_no = "TR";
 $date = date("dmy");
-$increment_number = sprintf("%03s", $id_trans); //s: string
+$increment_number = sprintf("%03s", $id_trans);
 $no_transaction = $format_no . "-" . $date . "-" . $increment_number;
 
 if (isset($_POST['save'])) {
@@ -90,247 +76,162 @@ if (isset($_POST['save'])) {
             $qty = $qtys[$key];
             $total = $totals[$key];
 
-            $insTransacDetail = mysqli_query($config, "INSERT INTO transaction_details (id_transaction, id_product, qty, total) VALUES ('$id_transaction', '$id_product', '$qty', '$total')");
+            mysqli_query($config, "INSERT INTO transaction_details (id_transaction, id_product, qty, total) VALUES ('$id_transaction', '$id_product', '$qty', '$total')");
         }
         header("location:?page=pos");
         exit();
     }
 }
 
-
+function getOrderStatus($status)
+{
+    switch ($status) {
+        case 0:
+            return '<span class="badge bg-warning">Baru</span>';
+        case 1:
+            return '<span class="badge bg-success">selesai</span>';
+        default:
+            return '<span class="badge bg-secondary">Unknown Status</span>';
+    }
+}
 ?>
 
+<link href="https://cdn.jsdelivr.net/npm/bootstrap-icons/font/bootstrap-icons.css" rel="stylesheet">
 
-<div class="row">
-    <div class="col-sm-12">
-        <div class="card">
-            <div class="card-body">
-                <!-- untuk membuat nama user muncul di form -->
-                <?php
-                if (isset($_GET['add-user-role'])):
-                    $title = "Add User Role : ";
-                elseif (isset($_GET["edit"])):
-                    $title = "Edit Produk";
-                else:
-                    $title = "Tambah Produk";
-                endif;
-                ?>
-                <h5 class="card-title"><?php echo $title ?></h5>
-                <!-- //untuk menghilangkan form add user dan tambah form baru 16/06/2025 -->
-                <?php if (isset($_GET['add-user-role'])): ?>
-                    <div align="right" class="">
-                        <button class="btn btn-primary mb-3" data-bs-toggle="modal" data-bs-target="#exampleModal">Add Produk</button>
-                    </div>
-                    <table class="table table-bordered">
-                        <thead>
-                            <tr>
-                                <th>No</th>
-                                <th>Role Name</th>
-                                <th>Action</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <?php foreach ($rowUserRoles as $key => $rowUserRole) : ?>
-                                <tr>
-                                    <td><?php $key += 1; ?></td>
-                                    <td><?php echo $rowUserRole['name'] ?></td>
-                                    <td>
-                                        <a href="" class="btn btn-primary btn-sm">Edit</a>
-                                        <a href="" onclick="return confirm('are you sure???')" class="btn btn-danger btn-sm">Delete</a>
-                                    </td>
-                                </tr>
-                            <?php endforeach ?>
-                        </tbody>
-                    </table>
-                <?php else: ?>
-                    <!-- //untuk menghilangkan form add user -->
-                    <form action="" method="post">
-                        <div class="row">
-                            <div class="col-sm-4">
-                                <div class="mb-3">
-                                    <label for="">No Transaction </label>
-                                    <input value="<?php echo $no_transaction ?>"
-                                        type="text" class="form-control"
-                                        readonly
-                                        name="no_transaction">
-                                </div>
-                                <div class="mb-3">
-                                    <label for="">Menu </label>
-                                    <select name="id_product" id="id_product" class="form-control">
-                                        <option value="">Select One</option>
-                                        <?php foreach ($rowProducts as $rowProduct): ?>
-                                            <option data-price="<?php echo $rowProduct['price'] ?>" value="<?php echo $rowProduct['id'] ?>">
-                                                <?php echo $rowProduct['name'] ?>
-                                            </option>
-                                        <?php endforeach ?>
-                                    </select>
-                                </div>
-                            </div>
-                            <div class="col-sm-4">
-                                <div class="mb-3">
-                                    <label for="">Kasir</label>
-                                    <input value="<?php echo $_SESSION['NAME'] ?>"
-                                        type="text" class="form-control"
-                                        readonly>
-                                    <input type="hidden" name="id_user" value="<?php echo $_SESSION['ID_USER'] ?>">
-                                </div>
-                            </div>
-                        </div>
-
-                        <div align="right" class="mb-3">
-                            <button type="button" class="btn btn-primary addRow" id="addRow">Tambah</button>
-                        </div>
-                        <table class="table" id="myTable">
-                            <thead>
-                                <tr>
-                                    <th>No</th>
-                                    <th>Nama</th>
-                                    <th>Order</th>
-                                    <th>Total</th>
-                                    <th></th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                            </tbody>
-                        </table>
-                        <br>
-
-                        <p> <strong>Total : Rp. <span id="grandTotal"></span></strong> </p>
-                        <input type="hidden" name="grand_total" id="grandTotalInput" value="0">
-                        <div class="mb-3">
-                            <input type="submit" class="btn btn-success" name="save" value="Save">
-                        </div>
-                    </form>
-                <?php endif ?>
+<div class="container-fluid px-4 py-3">
+    <div class="card shadow-sm border-0">
+        <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
+            <div>
+                <h5 class="mb-0">Transaksi Penjualan</h5>
+                <small class="text-light">Kasir: <strong><?= $_SESSION['NAME'] ?></strong></small>
             </div>
+            <span class="fw-light">No Transaksi: <strong><?= $no_transaction ?></strong></span>
         </div>
-    </div>
-</div>
+        <div class="card-body">
+            <form method="POST">
+                <input type="hidden" name="no_transaction" value="<?= $no_transaction ?>">
+                <input type="hidden" name="id_user" value="<?= $_SESSION['ID_USER'] ?>">
 
-
-<!-- Modal -->
-<div class="modal fade" id="exampleModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
-    <div class="modal-dialog">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h1 class="modal-title fs-5" id="exampleModalLabel">Add New Role: </h1>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-            </div>
-            <form action="" method="post">
-                <div class="modal-body">
-                    <div class="mb-3">
-                        <label for="" class="form-label">Role Name</label>
-                        <select name="id_role" id="" class="form-control">
-                            <option value="">Select One</option>
-                            <?php foreach ($rowRoles as $rowRole): ?>
-                                <option value="<?php echo $rowRole['id'] ?>"><?php echo $rowRole['name'] ?></option>
-                            <?php endforeach ?>
+                <div class="row g-2 align-items-end mb-3">
+                    <div class="col-md-8">
+                        <label for="id_product" class="form-label">Pilih Produk</label>
+                        <select name="id_product" id="id_product" class="form-select">
+                            <option value="">-- Pilih Produk --</option>
+                            <?php foreach ($rowProducts as $rowProduct): ?>
+                                <option value="<?= $rowProduct['id'] ?>" data-price="<?= $rowProduct['price'] ?>">
+                                    <?= $rowProduct['name'] ?> - Rp <?= number_format($rowProduct['price']) ?>
+                                </option>
+                            <?php endforeach; ?>
                         </select>
                     </div>
+                    <div class="col-md-4">
+                        <button type="button" class="btn btn-success w-100" id="addRow">
+                            <i class="bi bi-plus-lg"></i> Tambah Produk
+                        </button>
+                    </div>
                 </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-                    <button type="submit" class="btn btn-primary">Save changes</button>
+
+                <div class="table-responsive">
+                    <table class="table table-bordered align-middle text-center" id="myTable">
+                        <thead class="table-primary">
+                            <tr>
+                                <th style="width: 5%">No</th>
+                                <th>Produk</th>
+                                <th style="width: 15%">Qty</th>
+                                <th>Total (Rp)</th>
+                                <th style="width: 10%">Aksi</th>
+                            </tr>
+                        </thead>
+                        <tbody></tbody>
+                    </table>
+                </div>
+
+                <div class="d-flex justify-content-end mt-3">
+                    <div class="me-3">
+                        <strong>Total: Rp <span id="totalDisplay">0</span></strong>
+                        <input type="hidden" name="grand_total" id="grandTotalInput" value="0">
+                    </div>
+                    <button type="submit" name="save" class="btn btn-primary">
+                        <i class="bi bi-cart-check"></i> Simpan Transaksi
+                    </button>
                 </div>
             </form>
         </div>
     </div>
 </div>
 
-
 <script>
-    // var, let, const, var: ketika nilainya tidak ada tidak error, kalo let harus mempunyai nilai
-    // const: nilainya tidak boleh berubah
-    // const nama = "bambang";
-    // nama = "reza";
-    // const button = document.getElementById('addRow');
-    // const button = document.getElementsByClassName('addRow');
-    const button = document.querySelector('.addRow');
-    const tbody = document.querySelector('#myTable tbody');
-    const select = document.querySelector('#id_product');
-    // button.textContent = "Duarr";
-    // button.style.color = "red";
-    const grandTotal = document.getElementById('grandTotal');
-    const grandTotalInput = document.getElementById('grandTotalInput');
+const button = document.getElementById('addRow');
+const select = document.getElementById('id_product');
+const tbody = document.querySelector('#myTable tbody');
+const totalDisplay = document.getElementById('totalDisplay');
+const grandTotalInput = document.getElementById('grandTotalInput');
+let no = 1;
 
-    let no = 1;
-    button.addEventListener("click", function() {
+button.addEventListener('click', function () {
+    const selected = select.options[select.selectedIndex];
+    const id = selected.value;
+    const name = selected.text;
+    const price = selected.dataset.price;
 
-        const selectedProduct = select.options[select.selectedIndex];
-        const productValue = selectedProduct.value;
-        if (!productValue) {
-            alert('Mohon diisi terlebih dahulu!');
-            return;
-        }
-        const productName = selectedProduct.textContent;
-        const productPrice = selectedProduct.dataset.price;
+    if (!id) {
+        alert('Pilih produk terlebih dahulu!');
+        return;
+    }
 
-        const tr = document.createElement('tr'); //<tr></tr>
-        tr.innerHTML = `
+    const row = document.createElement('tr');
+    row.innerHTML = `
         <td>${no}</td>
-        <td><input type='hidden' name='id_product[]' class='id_products'>${productName}</td>
+        <td><input type="hidden" name="id_product[]" value="${id}">${name}</td>
+        <td><input type="number" name="qty[]" value="1" class="form-control qty"></td>
         <td>
-            <input type='number' name='qty[]' value='1' class='qtys'>
-            <input type='hidden' class='priceInput' name='price[]' value='${productPrice}'>
+            <input type="hidden" name="price[]" value="${price}">
+            <input type="hidden" name="total[]" class="total" value="${price}">
+            <span class="total-text">${parseInt(price).toLocaleString('id-ID')}</span>
         </td>
-        <td><input type='hidden' name='total[]' class='totals' value='${productPrice}'><span class='totalText'>${productPrice}</span></td>
-        <td>
-            <button class='btn btn-success btn-sm removeRow' type='button'>Delete</button>
-        </td>
-        `; //<tr><td></td></tr>
+        <td><button type="button" class="btn btn-outline-danger btn-sm removeRow">Hapus</button></td>
+    `;
+    tbody.appendChild(row);
+    no++;
+    select.value = "";
+    updateGrandTotal();
+});
 
-        tbody.appendChild(tr);
-        no++;
-        select.value = ""; //untuk mengarahkan kembali ke option
-
+tbody.addEventListener('click', function (e) {
+    if (e.target.classList.contains('removeRow')) {
+        e.target.closest('tr').remove();
+        updateRowNumbers();
         updateGrandTotal();
+    }
+});
 
-    });
-
-    tbody.addEventListener('click', function(e) { //e: callback
-        if (e.target.classList.contains('removeRow')) {
-            e.target.closest("tr").remove();
-        }
-
-        updateNumber();
+tbody.addEventListener('input', function (e) {
+    if (e.target.classList.contains('qty')) {
+        const row = e.target.closest('tr');
+        const qty = parseInt(e.target.value) || 0;
+        const price = parseInt(row.querySelector('input[name="price[]"]').value);
+        const newTotal = price * qty;
+        row.querySelector('.total').value = newTotal;
+        row.querySelector('.total-text').textContent = newTotal.toLocaleString('id-ID');
         updateGrandTotal();
-
-
-
-    });
-
-    tbody.addEventListener('input', function(e) {
-        if (e.target.classList.contains('qtys')) {
-            const row = e.target.closest("tr");
-            const qty = parseInt(e.target.value) || 0;
-
-            const price = parseInt(row.querySelector('[name="price[]"]').value);
-            // const price = 10000;
-            row.querySelector('.totalText').textContent = price * qty;
-            row.querySelector('.totals').value = price * qty;
-            // console.log(price);
-            updateGrandTotal();
-
-        }
-    });
-
-    function updateNumber() {
-        const rows = tbody.querySelectorAll("tr");
-
-        rows.forEach(function(row, index) {
-            row.cells[0].textContent = index + 1;
-        });
-
-        no = rows.length + 1;
     }
+});
 
-    function updateGrandTotal() {
-        const totalCells = tbody.querySelectorAll('.totals');
-        let grand = 0;
-        totalCells.forEach(function(input) {
-            grand += parseInt(input.value) || 0;
-        });
-        grandTotal.textContent = grand.toLocaleString('id-ID');
-        grandTotalInput.value = grand;
-    }
+function updateGrandTotal() {
+    const totals = tbody.querySelectorAll('.total');
+    let grand = 0;
+    totals.forEach(input => {
+        grand += parseInt(input.value) || 0;
+    });
+    totalDisplay.textContent = grand.toLocaleString('id-ID');
+    grandTotalInput.value = grand;
+}
+
+function updateRowNumbers() {
+    const rows = tbody.querySelectorAll('tr');
+    rows.forEach((row, index) => {
+        row.querySelector('td').textContent = index + 1;
+    });
+    no = rows.length + 1;
+}
 </script>

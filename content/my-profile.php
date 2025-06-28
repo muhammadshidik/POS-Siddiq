@@ -1,5 +1,5 @@
 <?php
-require_once 'admin/controller/koneksi.php';
+include 'admin/controller/koneksi.php';
 
 
 $idEdit = $_SESSION['id'];

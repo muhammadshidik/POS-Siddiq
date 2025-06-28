@@ -25,6 +25,7 @@ $rows = mysqli_fetch_all($query, MYSQLI_ASSOC);
                                 <th>Price</th>
                                 <th>Qty</th>
                                 <th>Desc</th>
+                                <th>Gambar</th>
                                 <th>Action</th>
                             </tr>
                         </thead>
@@ -38,6 +39,8 @@ $rows = mysqli_fetch_all($query, MYSQLI_ASSOC);
                                     <td><?php echo $data['price']; ?></td>
                                     <td><?php echo $data['qty']; ?></td>
                                     <td><?php echo $data['description']; ?></td>
+                                    <td><?php echo $data['image']; ?></td>
+
 
                                     <td class="container" style="width : 215px">
                                         <a href="?page=tambah-product&id=<?php echo $data['id'] ?>" class="btn btn-warning btn-sm">Add Product</a>

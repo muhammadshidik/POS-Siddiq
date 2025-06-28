@@ -1,3 +1,27 @@
+<?php
+// getting account data
+
+// DITAMBAHKAN: Pengecekan untuk menghindari error jika session id tidak ada
+$idNav = isset($_SESSION['id']) ? $_SESSION['id'] : 0;
+$rowNav = null; // Inisialisasi variabel untuk mencegah error jika query gagal
+
+// Hanya jalankan query jika idNav valid (bukan 0)
+if ($idNav != 0) {
+    // DIUBAH: Query SQL diperbaiki. JOIN ke tabel 'roles', bukan 'level'.
+    // Asumsi: Ada kolom 'role_id' di tabel 'users' untuk menghubungkan ke tabel 'roles'.
+    $queryNav = mysqli_query($config, "SELECT users.*, roles.name AS role_name FROM users LEFT JOIN roles ON users.role_id = roles.id WHERE users.id = '$idNav'");
+    
+    // DITAMBAHKAN: Pengecekan hasil query sebelum di-fetch
+    if ($queryNav) {
+        $rowNav  = mysqli_fetch_array($queryNav);
+    } else {
+        // Baris ini akan membantu Anda melihat error SQL jika ada masalah lain
+        echo "Error pada query: " . mysqli_error($config);
+    }
+}
+?>
+
+
 <nav
             class="navbar navbar-header navbar-header-transparent navbar-expand-lg border-bottom"
           >
@@ -302,14 +326,14 @@
                   >
                     <div class="avatar-sm">
                       <img
-                        src="template/assets/img/profile.jpg"
+                        src="<?= !empty($rowNav['profile_picture']) && file_exists('admin/img/profile_picture/' . $rowNav['profile_picture']) ? 'admin/img/profile_picture/' . $rowNav['profile_picture'] : 'https://placehold.co/100' ?> "
                         alt="..."
                         class="avatar-img rounded-circle"
                       />
                     </div>
                     <span class="profile-username">
                       <span class="op-7">Hi,</span>
-                      <span class="fw-bold">Hizrian</span>
+                      <span class="fw-bold"><?= isset($rowNav['username']) ? $rowNav['username'] : '-- your name --' ?></span>
                     </span>
                   </a>
                   <ul class="dropdown-menu dropdown-user animated fadeIn">
@@ -318,16 +342,17 @@
                         <div class="user-box">
                           <div class="avatar-lg">
                             <img
-                              src="template/assets/img/profile.jpg"
+                              src="<?= !empty($rowNav['profile_picture']) && file_exists('admin/img/profile_picture/' . $rowNav['profile_picture']) ? 'admin/img/profile_picture/' . $rowNav['profile_picture'] : 'https://placehold.co/100' ?> "
                               alt="image profile"
                               class="avatar-img rounded"
                             />
                           </div>
                           <div class="u-text">
-                            <h4>Hizrian</h4>
-                            <p class="text-muted">hello@example.com</p>
+                            <h4><?= isset($rowNav['username']) ? $rowNav['username'] : '-- your name --' ?></h4>
+                            <h4> <?php isset($rowNav['level_name']) ? $rowNav['level_name'] : '' ?></h4>
+                            <p class="text-muted"><?= isset($rowNav['email']) ? $rowNav['email'] : '-- your name --' ?></p>
                             <a
-                              href="profile.html"
+                              href="?page=my-profile"
                               class="btn btn-xs btn-secondary btn-sm"
                               >View Profile</a
                             >
@@ -342,7 +367,7 @@
                         <div class="dropdown-divider"></div>
                         <a class="dropdown-item" href="#">Account Setting</a>
                         <div class="dropdown-divider"></div>
-                        <a class="dropdown-item" href="logout.php">Logout</a>
+                        <a class="dropdown-item" href="login.php">Logout</a>
                       </li>
                     </div>
                   </ul>

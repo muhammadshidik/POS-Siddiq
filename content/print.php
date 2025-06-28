@@ -1,3 +1,27 @@
+<?php
+include 'admin/controller/koneksi.php';
+
+if (isset($_GET['print'])) {
+    $id = $_GET['print'];
+
+    // Update status menjadi selesai (2)
+    mysqli_query($config, "UPDATE transactions SET order_status = 1 WHERE id = '$id'");
+
+    $query = mysqli_query($config, "SELECT transactions.*, users.name AS kasir 
+        FROM transactions 
+        LEFT JOIN users ON users.id = transactions.id_user 
+        WHERE transactions.id = '$id'");
+
+    $data = mysqli_fetch_assoc($query);
+
+    $detailQuery = mysqli_query($config, "SELECT td.*, p.name AS product_name, p.price 
+        FROM transaction_details td
+        LEFT JOIN products p ON td.id_product = p.id
+        WHERE td.id_transaction = '$id'");
+
+    $details = mysqli_fetch_all($detailQuery, MYSQLI_ASSOC);
+}
+?>
 <!DOCTYPE html>
 <html lang="en">
 
@@ -8,7 +32,6 @@
     <style>
         .body {
             font-family: monospace;
-            /* width: 300px; */
             width: 80mm;
             margin: auto;
             padding: 10px;
@@ -66,40 +89,41 @@
             <h3>Kedai Kopi PPKD JP</h3>
             <h2>Enak Lho</h2>
             <div class="info">
-                Jl. Karet Baru Benhill Jakarta Pusat
-                <br>
+                Jl. Karet Baru Benhill Jakarta Pusat<br>
                 08994839202
             </div>
         </div>
         <div class="line"></div>
         <div class="info">
             <div class="row">
-                <span>20 Juni 2025</span>
-                <span>9:39</span>
+                <span><?= date('d M Y', strtotime($data['created_at'] ?? date('Y-m-d'))) ?></span>
+                <span><?= date('H:i') ?></span>
             </div>
             <div class="row">
                 <span>Cashier</span>
-                <span>Reza</span>
+                <span><?= $data['kasir'] ?? '-' ?></span>
             </div>
             <div class="row">
                 <span>Order Id</span>
-                <span>TR-200625-001</span>
+                <span><?= $data['no_transaction'] ?? '-' ?></span>
             </div>
         </div>
         <div class="line"></div>
         <div class="product">
-            <div class="item">
-                <strong>Es Smooth Vanilla Cofee</strong>
-                <div class="item-qty">
-                    <span>1x @ 20.000</span>
-                    <span>Rp. 20.000</span>
+            <?php foreach ($details as $item): ?>
+                <div class="item">
+                    <strong><?= $item['product_name'] ?></strong>
+                    <div class="item-qty">
+                        <span><?= $item['qty'] ?>x @ Rp <?= number_format($item['price'], 0, ',', '.') ?></span>
+                        <span>Rp <?= number_format($item['total'], 0, ',', '.') ?></span>
+                    </div>
                 </div>
-            </div>
+            <?php endforeach; ?>
             <div class="line"></div>
             <div class="summary">
                 <div class="row">
                     <span>Subtotal</span>
-                    <span>Rp. 20.000</span>
+                    <span>Rp <?= number_format($data['sub_total'], 0, ',', '.') ?></span>
                 </div>
             </div>
             <div class="line"></div>
